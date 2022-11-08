@@ -1,6 +1,6 @@
 {
   "name": "com.spellboundar.juicy-buttons",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "displayName": "Juicy Buttons",
   "description": "Adds all of the missing events to buttons, allowing deeper customization options.",
   "unity": "2019.1",
