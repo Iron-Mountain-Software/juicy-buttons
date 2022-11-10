@@ -1,13 +1,19 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
 
 [ExecuteAlways]
-[RequireComponent(typeof(Image))]
+[RequireComponent(typeof(Graphic))]
 [RequireComponent(typeof(Shadow))]
 [RequireComponent(typeof(JuicyButton))]
 public class JuicyButton3DEffect : MonoBehaviour
 {
+    private const string ShaderName = "Custom/3DEffectShader";
+    private const string MainColorName = "_MainColor";
+    private const string ShadowColorName = "_ShadowColor";
+    
+    private static readonly int MainColor = Shader.PropertyToID(MainColorName);
+    private static readonly int ShadowColor = Shader.PropertyToID(ShadowColorName);
+
     private enum HeightType
     {
         ScreenPercent,
@@ -27,8 +33,9 @@ public class JuicyButton3DEffect : MonoBehaviour
     private Image _image;
     private Shadow _shadow;
     private JuicyButton _button;
+    private Material _material;
     private float _slicedMultiplier;
-    
+
     private bool IsSlicedImage => _image != null && _image.type == Image.Type.Sliced;
 
     private float HeightPixels
@@ -69,6 +76,7 @@ public class JuicyButton3DEffect : MonoBehaviour
     {
         _button = GetComponent<JuicyButton>();
         _image = GetComponent<Image>();
+        Shadow.enabled = true;
         if (IsSlicedImage) _slicedMultiplier = _image.pixelsPerUnitMultiplier;
         _button.OnPointerDownEvent += OnPointerDown;
         _button.OnPointerUpEvent += OnPointerUp;
@@ -76,15 +84,42 @@ public class JuicyButton3DEffect : MonoBehaviour
         _button.OnPointerExitEvent += OnPointerExit;
         _button.OnInteractableChanged += OnInteractableChange;
         OnInteractableChange(_button.interactable);
+        CreateMaterial();
     }
 
     private void OnDisable()
     {
+        Shadow.enabled = false;
         _button.OnPointerDownEvent -= OnPointerDown;
         _button.OnPointerUpEvent -= OnPointerUp;
         _button.OnPointerEnterEvent -= OnPointerEnter;
         _button.OnPointerExitEvent -= OnPointerExit;
         _button.OnInteractableChanged -= OnInteractableChange;
+        DestroyMaterial();
+    }
+
+    private void CreateMaterial()
+    {
+        if (_material) return;
+        Shader shader = Shader.Find(ShaderName);
+        _material = new Material(shader);
+        _image.material = _material;
+    }
+
+    private void DestroyMaterial()
+    {
+        if (!_material) return;
+        _image.material = null;
+        if (Application.isPlaying) Destroy(_material);
+        else DestroyImmediate(_material);
+        _material = null;
+    }
+
+    private void RefreshColors()
+    {
+        if (!_material) return;
+        _material.SetColor(MainColor, _image.color);
+        _material.SetColor(ShadowColor, _shadow.effectColor);
     }
 
     private void OnInteractableChange(bool interactable)
@@ -126,20 +161,39 @@ public class JuicyButton3DEffect : MonoBehaviour
 
     private void GoDownImmediate()
     {
-        RectTransform.offsetMin = new Vector2(0, 0);
-        RectTransform.offsetMax = new Vector2(0, -HeightPixels);
-        Shadow.effectDistance = new Vector2(0, 0);
+        if (enabled)
+        {
+            RectTransform.offsetMin = Vector2.zero;
+            RectTransform.offsetMax = new Vector2(0, -HeightPixels);
+            Shadow.effectDistance = Vector2.zero;
+        }
+        else
+        {
+            RectTransform.offsetMin = Vector2.zero;
+            RectTransform.offsetMax = Vector2.zero;
+            Shadow.effectDistance = Vector2.zero;
+        }
     }
 
     private void GoUpImmediate()
     {
-        RectTransform.offsetMin = new Vector2(0, HeightPixels);
-        RectTransform.offsetMax = new Vector2(0, 0);
-        Shadow.effectDistance = new Vector2(0, -HeightPixels);
+        if (enabled)
+        {
+            RectTransform.offsetMin = new Vector2(0, HeightPixels);
+            RectTransform.offsetMax = Vector2.zero;
+            Shadow.effectDistance = new Vector2(0, -HeightPixels);
+        }
+        else
+        {
+            RectTransform.offsetMin = Vector2.zero;
+            RectTransform.offsetMax = Vector2.zero;
+            Shadow.effectDistance = Vector2.zero;
+        }
     }
 
     private void OnValidate()
     {
+        RefreshColors();
         GoUpImmediate();
     }
 }
