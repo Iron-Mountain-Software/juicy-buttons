@@ -9,10 +9,15 @@
     "vfx",
     "ui"
   ],
-  "author": {
-    "name": "Chris Monteferrante",
-    "email": "chris@spellboundar.com",
-    "url": ""
+  "author": "Chris Monteferrante <chris@spellboundar.com>",
+  "type": "tool",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SpellBoundAR-Packages/juicy-buttons.git"
   },
-  "type": "tool"
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SpellBoundAR-Packages/juicy-buttons/issues"
+  },
+  "homepage": "https://github.com/SpellBoundAR-Packages/juicy-buttons#readme"
 }
