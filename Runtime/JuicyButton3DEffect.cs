@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace SpellBoundAR.JuicyButtons
+namespace IronMountain.JuicyButtons
 {
     [ExecuteAlways]
     [RequireComponent(typeof(Graphic))]

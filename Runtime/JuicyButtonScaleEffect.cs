@@ -1,100 +1,69 @@
 using System.Collections;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-namespace SpellBoundAR.JuicyButtons
+namespace IronMountain.JuicyButtons
 {
     [DisallowMultipleComponent]
     [RequireComponent(typeof(JuicyButton))]
     public class JuicyButtonScaleEffect : MonoBehaviour
     {
-        [Header("Settings")]
-        [SerializeField] private Vector3 scaleWhenUp = Vector3.one;
-        [SerializeField] private Vector3 scaleWhenDown = Vector3.one * .9f;
-        [SerializeField] private float seconds = 0.2f;
-        [SerializeField] private bool downWhenDisabled = true;
+        [SerializeField] private JuicyButton button;
+        [SerializeField] private float seconds = 0.15f;
+        [SerializeField] [FormerlySerializedAs("scaleWhenUp")] private Vector3 normalScale = Vector3.one;
+        [SerializeField] private Vector3 highlightedScale = Vector3.one;
+        [SerializeField] [FormerlySerializedAs("scaleWhenDown")] private Vector3 pressedScale = Vector3.one * .95f;
+        [SerializeField] private Vector3 selectedScale = Vector3.one;
+        [SerializeField] private Vector3 disabledScale = Vector3.one;
 
-        [Header("Cache")]
-        private JuicyButton _button;
-        private bool _down;
-        private bool _pressed;
-        
         private void Awake()
         {
-            _button = GetComponent<JuicyButton>();
+            if (!button) button = GetComponent<JuicyButton>();
+        }
+
+        private void OnValidate()
+        {
+            if (!button) button = GetComponent<JuicyButton>();
         }
 
         private void OnEnable()
         {
-            if (!_button) return;
-            _button.OnPointerDownEvent += OnPointerDown;
-            _button.OnPointerUpEvent += OnPointerUp;
-            _button.OnPointerEnterEvent += OnPointerEnter;
-            _button.OnPointerExitEvent += OnPointerExit;
-            _button.OnInteractableChanged += OnInteractableChange;
-
-            OnInteractableChange(_button.interactable);
+            if (button) button.OnSelectionStateChanged += OnSelectionStateChanged;
+            OnSelectionStateChanged(button 
+                ? button.CurrentSelectionState
+                : JuicySelectionState.Normal);
         }
 
         private void OnDisable()
         {
-            if (!_button) return;
-            _button.OnPointerDownEvent -= OnPointerDown;
-            _button.OnPointerUpEvent -= OnPointerUp;
-            _button.OnPointerEnterEvent -= OnPointerEnter;
-            _button.OnPointerExitEvent -= OnPointerExit;
-            _button.OnInteractableChanged -= OnInteractableChange;
+            if (button) button.OnSelectionStateChanged -= OnSelectionStateChanged;
         }
-
-        private void OnInteractableChange(bool interactable)
+        
+        private void OnSelectionStateChanged(JuicySelectionState selectionState)
         {
-            if (!interactable && downWhenDisabled)
-                GoDown();
-            else GoUp();
-        }
-
-        private void OnPointerDown()
-        {
-            if (!_button.interactable) return;
-            _pressed = true;
-            GoDown();
-        }
-
-        private void OnPointerUp()
-        {
-            if (!_button.interactable) return;
-            _pressed = false;
-            GoUp();
-        }
-
-        private void OnPointerEnter()
-        {
-            if (!_button.interactable) return;
-            if (_pressed) GoDown();
-        }
-
-        private void OnPointerExit()
-        {
-            if (!_button.interactable) return;
-            if (!_pressed) GoUp();
-        }
-
-        private void GoDown()
-        {
-            if (_down) return;
-            _down = true;
             StopAllCoroutines();
-            StartCoroutine(SmoothRescale(transform.localScale, scaleWhenDown));
+            if (!isActiveAndEnabled) return;
+            switch(selectionState)
+            {
+                case JuicySelectionState.Normal:
+                    StartCoroutine(AnimateScale(transform.localScale, normalScale));
+                    break;
+                case JuicySelectionState.Highlighted:
+                    StartCoroutine(AnimateScale(transform.localScale, highlightedScale));
+                    break;
+                case JuicySelectionState.Pressed:
+                    StartCoroutine(AnimateScale(transform.localScale, pressedScale));
+                    break;
+                case JuicySelectionState.Selected:
+                    StartCoroutine(AnimateScale(transform.localScale, selectedScale));
+                    break;
+                case JuicySelectionState.Disabled:
+                    StartCoroutine(AnimateScale(transform.localScale, disabledScale));
+                    break;
+            }
         }
-
-        private void GoUp()
-        {
-            if (!_down) return;
-            _down = false;
-            StopAllCoroutines();
-            StartCoroutine(SmoothRescale(transform.localScale, scaleWhenUp));
-        }
-
-        private IEnumerator SmoothRescale(Vector3 startScale, Vector3 endScale)
+        
+        private IEnumerator AnimateScale(Vector3 startScale, Vector3 endScale)
         {
             for (float timer = 0f; timer < seconds; timer += Time.unscaledDeltaTime)
             {

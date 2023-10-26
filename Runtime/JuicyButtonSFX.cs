@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SpellBoundAR.JuicyButtons
+namespace IronMountain.JuicyButtons
 {
     [RequireComponent(typeof(JuicyButton))]
     [RequireComponent(typeof(AudioSource))]

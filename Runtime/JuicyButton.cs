@@ -2,7 +2,7 @@ using System;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-namespace SpellBoundAR.JuicyButtons
+namespace IronMountain.JuicyButtons
 {
     public class JuicyButton : Button
     {
@@ -13,6 +13,8 @@ namespace SpellBoundAR.JuicyButtons
         public event Action OnPointerClickEvent;
         public event Action<bool> OnInteractableChanged;
 
+        public event Action<JuicySelectionState> OnSelectionStateChanged;
+        
         public bool Interactable
         {
             get => interactable;
@@ -21,6 +23,51 @@ namespace SpellBoundAR.JuicyButtons
                 if (value == Interactable) return;
                 interactable = value;
                 OnInteractableChanged?.Invoke(Interactable);
+            }
+        }
+
+        public JuicySelectionState CurrentSelectionState
+        {
+            get
+            {
+                switch(currentSelectionState)
+                {
+                    case SelectionState.Normal:
+                        return JuicySelectionState.Normal;
+                    case SelectionState.Highlighted:
+                        return JuicySelectionState.Highlighted;
+                    case SelectionState.Pressed:
+                        return JuicySelectionState.Pressed;
+                    case SelectionState.Selected:
+                        return JuicySelectionState.Selected;
+                    case SelectionState.Disabled:
+                        return JuicySelectionState.Disabled;
+                    default:
+                        return JuicySelectionState.Normal;
+                }
+            }
+        }
+
+        protected override void DoStateTransition(SelectionState state, bool instant)
+        {
+            base.DoStateTransition(state, instant);
+            switch (state)
+            {
+                case SelectionState.Normal:
+                    OnSelectionStateChanged?.Invoke(JuicySelectionState.Normal);
+                    break;
+                case SelectionState.Highlighted:
+                    OnSelectionStateChanged?.Invoke(JuicySelectionState.Highlighted);
+                    break;
+                case SelectionState.Pressed:
+                    OnSelectionStateChanged?.Invoke(JuicySelectionState.Pressed);
+                    break;
+                case SelectionState.Selected:
+                    OnSelectionStateChanged?.Invoke(JuicySelectionState.Selected);
+                    break;
+                case SelectionState.Disabled:
+                    OnSelectionStateChanged?.Invoke(JuicySelectionState.Disabled);
+                    break;
             }
         }
 

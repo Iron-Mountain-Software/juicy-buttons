@@ -1,6 +1,6 @@
 {
-    "name": "com.spellboundar.juicy-buttons",
-    "rootNamespace": "SpellBoundAR.JuicyButtons",
+    "name": "com.iron-mountain.juicy-buttons",
+    "rootNamespace": "IronMountain.JuicyButtons",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],
