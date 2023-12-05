@@ -7,43 +7,70 @@ namespace IronMountain.JuicyButtons
     public class JuicyButtonSFX : MonoBehaviour
     {
         [Header("SFX")]
+        [SerializeField] private JuicyButton button;
+        [SerializeField] private AudioSource audioSource;
+        [SerializeField] private AudioClip pointerEnterSound;
+        [SerializeField] private AudioClip pointerExitSound;
         [SerializeField] private AudioClip buttonDownSound;
         [SerializeField] private AudioClip buttonUpSound;
 
-        [Header("Cache")]
-        private JuicyButton _button;
-        private AudioSource _audioSource;
+        private void Awake() => Initialize();
+        private void OnValidate() => Initialize();
 
-        private void Awake()
+        private void Initialize()
         {
-            _button = GetComponent<JuicyButton>();
-            _audioSource = GetComponent<AudioSource>();
-            _audioSource.clip = null;
-            _audioSource.playOnAwake = false;
+            if (!button) button = GetComponent<JuicyButton>();
+            if (!audioSource) audioSource = GetComponent<AudioSource>();
+            if (!audioSource) audioSource = gameObject.AddComponent<AudioSource>();
+            if (!audioSource) return;
+            audioSource.clip = null;
+            audioSource.playOnAwake = false;
         }
 
         private void OnEnable()
         {
-            _button.OnPointerDownEvent += OnPointerDown;
-            _button.OnPointerClickEvent += OnPointerClick;
+            if (!button) return;
+            button.OnPointerEnterEvent += OnPointerEnter;
+            button.OnPointerExitEvent += OnPointerExit;
+            button.OnPointerDownEvent += OnPointerDown;
+            button.OnPointerClickEvent += OnPointerClick;
         }
 
         private void OnDisable()
         {
-            _button.OnPointerDownEvent -= OnPointerDown;
-            _button.OnPointerClickEvent -= OnPointerClick;
+            if (!button) return;
+            button.OnPointerEnterEvent -= OnPointerEnter;
+            button.OnPointerExitEvent -= OnPointerExit;
+            button.OnPointerDownEvent -= OnPointerDown;
+            button.OnPointerClickEvent -= OnPointerClick;
         }
 
+        private void OnPointerEnter()
+        {
+            if (!button || !button.Interactable) return;
+            if (!audioSource || !pointerEnterSound) return;
+            audioSource.PlayOneShot(pointerEnterSound);
+        }
+        
+        private void OnPointerExit()
+        {
+            if (!button || !button.Interactable) return;
+            if (!audioSource || !pointerExitSound) return;
+            audioSource.PlayOneShot(pointerExitSound);
+        }
+        
         private void OnPointerDown()
         {
-            if (!_button.Interactable) return;
-            _audioSource.PlayOneShot(buttonDownSound);
+            if (!button || !button.Interactable) return;
+            if (!audioSource || !buttonDownSound) return;
+            audioSource.PlayOneShot(buttonDownSound);
         }
 
         private void OnPointerClick()
         {
-            if (!_button.Interactable) return;
-            _audioSource.PlayOneShot(buttonUpSound);
+            if (!button || !button.Interactable) return;
+            if (!audioSource || !buttonUpSound) return;
+            audioSource.PlayOneShot(buttonUpSound);
         }
     }
 }

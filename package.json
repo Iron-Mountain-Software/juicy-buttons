@@ -1,6 +1,6 @@
 {
   "name": "com.iron-mountain.juicy-buttons",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "displayName": "Juicy Buttons",
   "author": "Chris Monteferrante <ludachrismonte@gmail.com>",
   "unity": "2019.1",
@@ -19,7 +19,9 @@
   "useCases": [
     "Button sound effects",
     "Button scale animations",
-    "Button 3D effects"
+    "Button 3D effects",
+    "Button alpha effects",
+    "Button text font style effects"
   ],
   "directions": null,
   "keywords": [
@@ -35,6 +37,10 @@
     {
       "type": "itch.io",
       "url": "https://iron-mountain.itch.io/juicy-buttons"
+    },
+    {
+      "type": "npm",
+      "url": "https://www.npmjs.com/package/com.iron-mountain.juicy-buttons"
     }
   ],
   "dependencies": {}

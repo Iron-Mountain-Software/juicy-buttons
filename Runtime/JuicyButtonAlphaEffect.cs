@@ -1,31 +1,32 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace IronMountain.JuicyButtons
 {
-    [DisallowMultipleComponent]
-    [RequireComponent(typeof(JuicyButton))]
-    public class JuicyButtonScaleEffect : MonoBehaviour
+    [RequireComponent(typeof(CanvasGroup))]
+    public class JuicyButtonAlphaEffect : MonoBehaviour
     {
+        [SerializeField] private CanvasGroup canvasGroup;
         [SerializeField] private JuicyButton button;
         [SerializeField] private float seconds = 0.15f;
-        [SerializeField] [FormerlySerializedAs("scaleWhenUp")] private Vector3 normalScale = Vector3.one;
-        [SerializeField] private Vector3 highlightedScale = Vector3.one;
-        [SerializeField] [FormerlySerializedAs("scaleWhenDown")] private Vector3 pressedScale = Vector3.one * .95f;
-        [SerializeField] private Vector3 selectedScale = Vector3.one;
-        [SerializeField] private Vector3 disabledScale = Vector3.one;
-
+        [SerializeField] private float normalAlpha = 1;
+        [SerializeField] private float highlightedAlpha = 1;
+        [SerializeField] private float pressedAlpha = 1;
+        [SerializeField] private float selectedAlpha = 1;
+        [SerializeField] private float disabledAlpha = 1;
+        
         private void Awake()
         {
-            if (!button) button = GetComponent<JuicyButton>();
+            if (!canvasGroup) canvasGroup = GetComponent<CanvasGroup>();
+            if (!button) button = GetComponentInParent<JuicyButton>();
         }
 
         private void OnValidate()
         {
-            if (!button) button = GetComponent<JuicyButton>();
+            if (!canvasGroup) canvasGroup = GetComponent<CanvasGroup>();
+            if (!button) button = GetComponentInParent<JuicyButton>();
         }
-
+        
         private void OnEnable()
         {
             if (button) button.OnSelectionStateChanged += OnSelectionStateChanged;
@@ -42,36 +43,36 @@ namespace IronMountain.JuicyButtons
         private void OnSelectionStateChanged(JuicySelectionState selectionState)
         {
             StopAllCoroutines();
-            if (!isActiveAndEnabled) return;
+            if (!canvasGroup || !isActiveAndEnabled) return;
             switch(selectionState)
             {
                 case JuicySelectionState.Normal:
-                    StartCoroutine(AnimateScale(transform.localScale, normalScale));
+                    StartCoroutine(AnimateAlpha(canvasGroup.alpha, normalAlpha));
                     break;
                 case JuicySelectionState.Highlighted:
-                    StartCoroutine(AnimateScale(transform.localScale, highlightedScale));
+                    StartCoroutine(AnimateAlpha(canvasGroup.alpha, highlightedAlpha));
                     break;
                 case JuicySelectionState.Pressed:
-                    StartCoroutine(AnimateScale(transform.localScale, pressedScale));
+                    StartCoroutine(AnimateAlpha(canvasGroup.alpha, pressedAlpha));
                     break;
                 case JuicySelectionState.Selected:
-                    StartCoroutine(AnimateScale(transform.localScale, selectedScale));
+                    StartCoroutine(AnimateAlpha(canvasGroup.alpha, selectedAlpha));
                     break;
                 case JuicySelectionState.Disabled:
-                    StartCoroutine(AnimateScale(transform.localScale, disabledScale));
+                    StartCoroutine(AnimateAlpha(canvasGroup.alpha, disabledAlpha));
                     break;
             }
         }
         
-        private IEnumerator AnimateScale(Vector3 startScale, Vector3 endScale)
+        private IEnumerator AnimateAlpha(float startAlpha, float endAlpha)
         {
             for (float timer = 0f; timer < seconds; timer += Time.unscaledDeltaTime)
             {
                 float progress = timer / seconds;
-                transform.localScale = Vector3.Lerp(startScale, endScale, Mathf.SmoothStep(0f, 1f, progress));
+                canvasGroup.alpha = Mathf.Lerp(startAlpha, endAlpha, Mathf.SmoothStep(0f, 1f, progress));
                 yield return null;
             }
-            transform.localScale = endScale;
+            canvasGroup.alpha = endAlpha;
         }
     }
 }
